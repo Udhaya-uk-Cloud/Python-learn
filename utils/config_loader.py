@@ -3,13 +3,13 @@ import os
 from kiteconnect import KiteConnect
 from utils.logger import logger
 
-# Load configuration from config.json
+# Load configuration
 CONFIG_PATH = "config.json"
 
 def load_config():
-    """Load configuration and validate required keys."""
+    """Load configuration with validation."""
     if not os.path.exists(CONFIG_PATH):
-        logger.error("Missing config.json file. Ensure it exists in the project directory.")
+        logger.error("⚠️ Missing config.json file. Ensure it exists in the project directory.")
         return {}
 
     with open(CONFIG_PATH) as config_file:
@@ -18,7 +18,7 @@ def load_config():
     required_keys = ["KITE_API_KEY", "KITE_ACCESS_TOKEN", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"]
     for key in required_keys:
         if key not in config:
-            logger.warning(f"⚠️ Missing '{key}' in config.json!")
+            logger.warning(f"⚠️ Missing '{key}' in config.json! Using default values.")
 
     return config
 
@@ -35,4 +35,4 @@ if KITE_API_KEY and KITE_ACCESS_TOKEN:
     kite = KiteConnect(api_key=KITE_API_KEY)
     kite.set_access_token(KITE_ACCESS_TOKEN)
 else:
-    logger.error("Kite API credentials are missing. Trading bot cannot function.")
+    logger.error("⚠️ Kite API credentials are missing. Trading bot cannot function.")

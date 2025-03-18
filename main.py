@@ -1,5 +1,5 @@
 import time
-import threading
+import concurrent.futures
 from market_data.fetch_data import fetch_historical_data
 from market_data.fetch_live_data import fetch_live_data
 from strategy.vwm_signals import compute_vwm_signal
@@ -12,7 +12,7 @@ from utils.logger import logger
 bank_nifty_history = fetch_historical_data(BANK_NIFTY_SYMBOL)
 nifty_history = fetch_historical_data(NIFTY_SYMBOL)
 
-# Track last signals to avoid duplicate trades
+# Track last signals
 last_bank_signal = None
 last_nifty_signal = None
 
@@ -31,7 +31,6 @@ def fetch_and_process(symbol, history, last_signal):
             message = f"\n🔹 {symbol} - {signal} at {rounded_entry}\n🎯 Profit Target: {tp}\n🛑 Stop-Loss: {sl}\n"
             send_telegram_alert(message)
             return signal
-
     return last_signal
 
 # Graceful shutdown handler
@@ -41,23 +40,21 @@ def stop_trading():
     logger.info("Stopping the trading bot...")
 
 # Main trading loop
-while running:
-    try:
-        # Run fetching and signal processing in parallel
-        bank_thread = threading.Thread(target=lambda: fetch_and_process(BANK_NIFTY_SYMBOL, bank_nifty_history, last_bank_signal))
-        nifty_thread = threading.Thread(target=lambda: fetch_and_process(NIFTY_SYMBOL, nifty_history, last_nifty_signal))
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+    while running:
+        try:
+            bank_future = executor.submit(fetch_and_process, BANK_NIFTY_SYMBOL, bank_nifty_history, last_bank_signal)
+            nifty_future = executor.submit(fetch_and_process, NIFTY_SYMBOL, nifty_history, last_nifty_signal)
 
-        bank_thread.start()
-        nifty_thread.start()
+            last_bank_signal = bank_future.result()
+            last_nifty_signal = nifty_future.result()
 
-        bank_thread.join()
-        nifty_thread.join()
+        except KeyboardInterrupt:
+            stop_trading()
 
-    except KeyboardInterrupt:
-        stop_trading()
+        except Exception as e:
+            logger.error(f"Error during execution: {e}")
+            send_telegram_alert(f"Script Error: {str(e)}")
 
-    except Exception as e:
-        logger.error(f"Error during execution: {e}")
-        send_telegram_alert(f"Script Error: {str(e)}")
+        time.sleep(60)  # Fetch data every 1 minute
 
-    time.sleep(60)  # Fetch data every 1 minute
