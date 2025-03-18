@@ -10,6 +10,7 @@ def load_config():
     """Load configuration with validation."""
     if not os.path.exists(CONFIG_PATH):
         logger.error("⚠️ Missing config.json file. Ensure it exists in the project directory.")
+        print("❌ ERROR: config.json file is missing. Trading bot will not work.")
         return {}
 
     with open(CONFIG_PATH) as config_file:
@@ -19,7 +20,10 @@ def load_config():
     for key in required_keys:
         if key not in config:
             logger.warning(f"⚠️ Missing '{key}' in config.json! Using default values.")
-
+            print(f"⚠️ WARNING: Missing '{key}' in config.json. Some features may not work correctly.")
+    
+    logger.info("✅ Configuration loaded successfully.")
+    print("✅ Configuration loaded successfully.")
     return config
 
 config = load_config()
@@ -34,5 +38,8 @@ TELEGRAM_CHAT_ID = config.get("TELEGRAM_CHAT_ID", "")
 if KITE_API_KEY and KITE_ACCESS_TOKEN:
     kite = KiteConnect(api_key=KITE_API_KEY)
     kite.set_access_token(KITE_ACCESS_TOKEN)
+    logger.info("✅ KiteConnect API initialized successfully.")
+    print("✅ Kite API connection established.")
 else:
     logger.error("⚠️ Kite API credentials are missing. Trading bot cannot function.")
+    print("❌ ERROR: Missing Kite API credentials. Please check config.json.")

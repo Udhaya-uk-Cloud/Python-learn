@@ -18,25 +18,30 @@ def compute_signals(df, symbol):
         if latest['Stochastic_K'] < 20:
             signal = "BUY"
             entry_price = round_to_nearest_100(latest['close']) if "BANK" in symbol else round_to_nearest_50(latest['close'])
+            print(f"🚀 Time to enter {symbol}: Signal = {signal}, Entry Price = {entry_price} (Upward Movement)")
 
     elif latest['RSI'] < 45 and latest['MACD'] < 0 and latest['close'] < latest['Bollinger_Upper']:
         if latest['Stochastic_K'] > 80:
             signal = "SELL"
             entry_price = round_to_nearest_100(latest['close']) if "BANK" in symbol else round_to_nearest_50(latest['close'])
+            print(f"📉 Time to enter {symbol}: Signal = {signal}, Entry Price = {entry_price} (Downward Movement)")
 
     # ✅ VWAP Strategy (Institutional Order Flow)
     if signal == "HOLD":  # If no trend-following signal, check VWAP
         if latest['close'] > latest['VWAP'] and latest['volume'] > df['volume'].rolling(5).mean():
             signal = "BUY"
             entry_price = round_to_nearest_100(latest['close']) if "BANK" in symbol else round_to_nearest_50(latest['close'])
+            print(f"🚀 VWAP Confirmation: {symbol} is moving up. BUY at {entry_price}")
 
         elif latest['close'] < latest['VWAP'] and latest['volume'] > df['volume'].rolling(5).mean():
             signal = "SELL"
             entry_price = round_to_nearest_100(latest['close']) if "BANK" in symbol else round_to_nearest_50(latest['close'])
+            print(f"📉 VWAP Confirmation: {symbol} is moving down. SELL at {entry_price}")
 
     # ✅ Avoid Liquidity Traps (If price already moved more than 1.5x ATR, skip the trade)
     if abs(latest['close'] - latest['VWAP']) > (1.5 * latest['ATR']):
         signal = "HOLD"
+        print(f"⚠️ {symbol}: Liquidity trap detected. Skipping trade.")
     
     # ✅ Mean Reversion Strategy (Reversal Trades)
     df['Bollinger_Lower'] = BollingerBands(df['close']).bollinger_lband()
@@ -47,10 +52,12 @@ def compute_signals(df, symbol):
         if latest['close'] <= latest['Bollinger_Lower'] and latest['RSI'] < 30:
             signal = "BUY"
             entry_price = round_to_nearest_100(latest['close']) if "BANK" in symbol else round_to_nearest_50(latest['close'])
+            print(f"🔄 {symbol}: Reversal detected (Oversold). BUY at {entry_price}")
 
         elif latest['close'] >= latest['Bollinger_Upper'] and latest['RSI'] > 70:
             signal = "SELL"
             entry_price = round_to_nearest_100(latest['close']) if "BANK" in symbol else round_to_nearest_50(latest['close'])
+            print(f"🔄 {symbol}: Reversal detected (Overbought). SELL at {entry_price}")
     
     return signal, entry_price
 
@@ -72,10 +79,11 @@ market_structure = detect_market_structure(df)
 
 # Trade only when BOS confirms the trend
 if market_structure == "BULLISH_BOS" and signal == "BUY":
-    pass  # Keep trade
+    print("✅ Confirmed Bullish Structure: Proceeding with BUY.")
 
 elif market_structure == "BEARISH_BOS" and signal == "SELL":
-    pass  # Keep trade
+    print("✅ Confirmed Bearish Structure: Proceeding with SELL.")
 
 else:
     signal = "HOLD"  # If no BOS, avoid trade
+    print("⚠️ No strong market structure confirmation. Holding.")
