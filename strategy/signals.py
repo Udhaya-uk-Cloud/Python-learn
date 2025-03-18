@@ -2,6 +2,7 @@ from strategy.indicators import compute_indicators
 from utils.rounding import round_to_nearest_50, round_to_nearest_100
 
 def compute_signals(df, symbol):
+    """Computes buy/sell signals based on technical indicators."""
     df = compute_indicators(df)
     latest = df.iloc[-1]
     signal, entry_price = "HOLD", None

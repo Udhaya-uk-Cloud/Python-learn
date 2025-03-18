@@ -1,5 +1,3 @@
-# utils/rounding.py
-
 def round_to_nearest_100(price):
     """Rounds price to the nearest 100."""
     return round(price / 100) * 100

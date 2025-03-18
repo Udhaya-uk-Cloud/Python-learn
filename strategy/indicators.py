@@ -4,7 +4,7 @@ from ta.trend import EMAIndicator, MACD
 from ta.volatility import AverageTrueRange, BollingerBands
 
 def compute_indicators(df):
-    """Computes technical indicators for market analysis."""
+    """Computes various technical indicators for market analysis."""
     df['RSI'] = RSIIndicator(df['close'], 14).rsi()
     df['EMA_Short'] = EMAIndicator(df['close'], 9).ema_indicator()
     df['EMA_Long'] = EMAIndicator(df['close'], 21).ema_indicator()
