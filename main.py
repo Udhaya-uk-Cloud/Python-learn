@@ -1,4 +1,5 @@
 import time
+import threading
 from market_data.fetch_data import fetch_historical_data
 from market_data.fetch_live_data import fetch_live_data
 from strategy.vwm_signals import compute_vwm_signal
@@ -7,7 +8,7 @@ from utils.config_loader import BANK_NIFTY_SYMBOL, NIFTY_SYMBOL
 from utils.rounding import round_to_nearest_50, round_to_nearest_100
 from utils.logger import logger
 
-# Fetch historical data for both indices
+# Fetch historical data
 bank_nifty_history = fetch_historical_data(BANK_NIFTY_SYMBOL)
 nifty_history = fetch_historical_data(NIFTY_SYMBOL)
 
@@ -15,43 +16,45 @@ nifty_history = fetch_historical_data(NIFTY_SYMBOL)
 last_bank_signal = None
 last_nifty_signal = None
 
-# ----------------------------
-# AUTOMATE TRADING EVERY 1 MINUTE
-# ----------------------------
-while True:
-    try:
-        # Fetch latest prices
-        bank_nifty_price = fetch_live_data(BANK_NIFTY_SYMBOL)
-        nifty_price = fetch_live_data(NIFTY_SYMBOL)
+# Graceful exit flag
+running = True
 
-        # Default signal values
-        bank_signal, bank_entry, bank_sl, bank_tp = "HOLD", None, None, None
-        nifty_signal, nifty_entry, nifty_sl, nifty_tp = "HOLD", None, None, None
+def fetch_and_process(symbol, history, last_signal):
+    """Fetch live data, compute signals, and return updated signal."""
+    price = fetch_live_data(symbol)
+    if price:
+        history.append({"high": price, "low": price, "close": price})
+        signal, entry, sl, tp = compute_vwm_signal(history, symbol)
 
-        # Compute trading signals
-        if bank_nifty_price:
-            bank_nifty_history.append({"high": bank_nifty_price, "low": bank_nifty_price, "close": bank_nifty_price})
-            bank_signal, bank_entry, bank_sl, bank_tp = compute_vwm_signal(bank_nifty_history, "BANK NIFTY")
-
-        if nifty_price:
-            nifty_history.append({"high": nifty_price, "low": nifty_price, "close": nifty_price})
-            nifty_signal, nifty_entry, nifty_sl, nifty_tp = compute_vwm_signal(nifty_history, "NIFTY")
-
-        # If a new signal appears, send an alert
-        if (bank_signal != "HOLD" and bank_signal != last_bank_signal) or (nifty_signal != "HOLD" and nifty_signal != last_nifty_signal):
-            message = "📌 *PLACE THE ORDER*\n"
-
-            if bank_signal != "HOLD":
-                rounded_bank_entry = round_to_nearest_100(bank_entry)
-                message += f"\n🔵 BANK NIFTY - {bank_signal} at {rounded_bank_entry}\n🎯 Profit Target: {bank_tp}\n🛑 Stop-Loss: {bank_sl}\n"
-
-            if nifty_signal != "HOLD":
-                rounded_nifty_entry = round_to_nearest_50(nifty_entry)
-                message += f"\n🔴 NIFTY - {nifty_signal} at {rounded_nifty_entry}\n🎯 Profit Target: {nifty_tp}\n🛑 Stop-Loss: {nifty_sl}\n"
-
+        if signal != "HOLD" and signal != last_signal:
+            rounded_entry = round_to_nearest_100(entry) if "BANK" in symbol else round_to_nearest_50(entry)
+            message = f"\n🔹 {symbol} - {signal} at {rounded_entry}\n🎯 Profit Target: {tp}\n🛑 Stop-Loss: {sl}\n"
             send_telegram_alert(message)
-            last_bank_signal = bank_signal
-            last_nifty_signal = nifty_signal
+            return signal
+
+    return last_signal
+
+# Graceful shutdown handler
+def stop_trading():
+    global running
+    running = False
+    logger.info("Stopping the trading bot...")
+
+# Main trading loop
+while running:
+    try:
+        # Run fetching and signal processing in parallel
+        bank_thread = threading.Thread(target=lambda: fetch_and_process(BANK_NIFTY_SYMBOL, bank_nifty_history, last_bank_signal))
+        nifty_thread = threading.Thread(target=lambda: fetch_and_process(NIFTY_SYMBOL, nifty_history, last_nifty_signal))
+
+        bank_thread.start()
+        nifty_thread.start()
+
+        bank_thread.join()
+        nifty_thread.join()
+
+    except KeyboardInterrupt:
+        stop_trading()
 
     except Exception as e:
         logger.error(f"Error during execution: {e}")
