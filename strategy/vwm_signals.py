@@ -33,8 +33,9 @@ class VWMSignalProcessor:
         self.confirmation_counters.setdefault(symbol, 0)
         self.last_trade_price.setdefault(symbol, 0)
 
-        # ✅ Debug Log: Print Indicator Values
-        print(f"📊 DEBUG {symbol}: RSI={latest['RSI']:.2f}, MACD={latest['MACD_Diff']:.2f}, EMA_Short={latest['EMA_Short']:.2f}, EMA_Long={latest['EMA_Long']:.2f}, ATR={latest['ATR']:.2f}, Close={latest['close']:.2f}")
+        # ✅ Debug Log: Print Indicator Values for Analysis
+        print(f"\n📊 DEBUG {symbol}:")
+        print(f"RSI={latest['RSI']:.2f}, MACD={latest['MACD_Diff']:.2f}, EMA_Short={latest['EMA_Short']:.2f}, EMA_Long={latest['EMA_Long']:.2f}, ATR={latest['ATR']:.2f}, Close={latest['close']:.2f}")
 
         # ✅ Buy/Sell Signal Conditions (More Flexible)
         if latest["RSI"] > 50 and latest["MACD_Diff"] > -0.5 and latest["close"] > latest["EMA_Short"]:
@@ -48,7 +49,7 @@ class VWMSignalProcessor:
             print(f"📉 SELL Signal for {symbol} at {entry_price}")
 
         # ✅ ATR-Based Stop-Loss & Profit Target (Dynamic)
-        atr_multiplier = 2.5  # Slightly increased for better risk management
+        atr_multiplier = 2.5  # Adjusted for better risk management
         stop_loss = round(entry_price - (atr_multiplier * latest["ATR"])) if new_signal == "BUY" else round(entry_price + (atr_multiplier * latest["ATR"]))
         profit_target = round(entry_price + (3.5 * latest["ATR"])) if new_signal == "BUY" else round(entry_price - (3.5 * latest["ATR"]))
 
