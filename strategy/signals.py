@@ -3,6 +3,7 @@ from ta.volatility import BollingerBands
 from ta.momentum import RSIIndicator
 from strategy.indicators import compute_indicators
 from utils.rounding import round_to_nearest_50, round_to_nearest_100
+from market_data.fetch_data import fetch_historical_data  # Ensure data is fetched
 
 def compute_signals(df, symbol):
     """Computes buy/sell signals based on indicators + VWAP + Smart Money Concepts + Reversals."""
@@ -61,7 +62,6 @@ def compute_signals(df, symbol):
     
     return signal, entry_price
 
-
 def detect_market_structure(df):
     """Detects market structure changes (Break of Structure, Change of Character)."""
     latest = df.iloc[-1]
@@ -74,16 +74,12 @@ def detect_market_structure(df):
     else:
         return "NO_CHANGE"
 
-# Detect Market Structure
-market_structure = detect_market_structure(df)
+# Ensure df is defined before detecting market structure
+df = fetch_historical_data("NSE:NIFTY 50")  # Default to NIFTY for initialization
 
-# Trade only when BOS confirms the trend
-if market_structure == "BULLISH_BOS" and signal == "BUY":
-    print("✅ Confirmed Bullish Structure: Proceeding with BUY.")
-
-elif market_structure == "BEARISH_BOS" and signal == "SELL":
-    print("✅ Confirmed Bearish Structure: Proceeding with SELL.")
-
+if len(df) > 1:
+    market_structure = detect_market_structure(df)
+    print(f"📊 Market Structure Detected: {market_structure}")
 else:
-    signal = "HOLD"  # If no BOS, avoid trade
-    print("⚠️ No strong market structure confirmation. Holding.")
+    market_structure = "NO_DATA"
+    print("⚠️ Market data not available. Skipping market structure detection.")
