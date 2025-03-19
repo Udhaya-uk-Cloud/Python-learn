@@ -42,17 +42,16 @@ def fetch_and_process(symbol, history, last_signal):
     if price:
         print(f"📊 Live price of {symbol}: {price}")
         history.append({"high": price, "low": price, "close": price})
-        df_history = pd.DataFrame(list(history))
+        
+        # ✅ Call compute_vwm_signal and print all debug logs
+        signal, entry, sl, tp = vwm_processor.compute_vwm_signal(pd.DataFrame(list(history)), symbol)
 
-        if not df_history.empty:
-            signal, entry, sl, tp = vwm_processor.compute_vwm_signal(df_history, symbol)
-
-            if signal != "HOLD" and signal != last_signal:
-                rounded_entry = round_to_nearest_100(entry) if "BANK" in symbol else round_to_nearest_50(entry)
-                message = f"\n🔹 {symbol} - {signal} at {rounded_entry}\n🎯 Profit Target: {tp}\n🛑 Stop-Loss: {sl}\n"
-                print(f"🚀 New Trade Alert: {message}")
-                send_telegram_alert(message)
-                return signal
+        if signal != "HOLD" and signal != last_signal:
+            rounded_entry = round_to_nearest_100(entry) if "BANK" in symbol else round_to_nearest_50(entry)
+            message = f"\n🔹 {symbol} - {signal} at {rounded_entry}\n🎯 Profit Target: {tp}\n🛑 Stop-Loss: {sl}\n"
+            print(f"🚀 New Trade Alert: {message}")
+            send_telegram_alert(message)
+            return signal
     else:
         print(f"⚠️ No live data received for {symbol}.")
     return last_signal

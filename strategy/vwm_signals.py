@@ -39,7 +39,7 @@ class VWMSignalProcessor:
 
         # ✅ Adjusted Buy/Sell Signal Conditions for More Signals
         if (
-            latest["RSI"] > 52 and  # Loosened RSI condition
+            latest["RSI"] > 50 and  # Loosened RSI condition
             latest["MACD_Diff"] > -0.2 and  # Adjusted MACD sensitivity
             latest["close"] > latest["EMA_Short"] and
             latest["close"] > latest["EMA_Long"]
@@ -49,7 +49,7 @@ class VWMSignalProcessor:
             print(f"🚀 BUY Signal for {symbol} at {entry_price}")
 
         elif (
-            latest["RSI"] < 48 and  # Loosened RSI condition
+            latest["RSI"] < 50 and  # Loosened RSI condition
             latest["MACD_Diff"] < 0 and
             latest["close"] < latest["EMA_Long"]
         ):
