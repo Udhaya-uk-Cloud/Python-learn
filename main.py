@@ -3,8 +3,7 @@ import concurrent.futures
 import pandas as pd
 from market_data.fetch_data import fetch_historical_data
 from market_data.fetch_live_data import fetch_live_data
-from strategy.vwm_signals import vwm_processor  # Import from VWM_signals.py
-from strategy.signals import detect_market_structure  # Keep other functions in signals.py
+from strategy.signals import vwm_processor, detect_market_structure
 from alerts.telegram_alerts import send_telegram_alert
 from utils.config_loader import BANK_NIFTY_SYMBOL, NIFTY_SYMBOL
 from utils.rounding import round_to_nearest_50, round_to_nearest_100

@@ -148,3 +148,21 @@
 2025-03-19 15:04:12,235 - INFO - ✅ Successfully fetched 350 data points for NSE:NIFTY 50
 2025-03-19 15:04:12,237 - INFO - 📡 Fetching historical data for NSE:NIFTY BANK...
 2025-03-19 15:04:12,316 - INFO - ✅ Successfully fetched 350 data points for NSE:NIFTY BANK
+2025-03-19 17:30:57,921 - INFO - ✅ Configuration loaded successfully.
+2025-03-19 17:30:57,922 - INFO - ✅ KiteConnect API initialized successfully.
+2025-03-19 17:32:26,754 - INFO - ✅ Configuration loaded successfully.
+2025-03-19 17:32:26,755 - INFO - ✅ KiteConnect API initialized successfully.
+2025-03-19 17:33:16,419 - INFO - ✅ Configuration loaded successfully.
+2025-03-19 17:33:16,420 - INFO - ✅ KiteConnect API initialized successfully.
+2025-03-19 17:33:16,441 - INFO - 📡 Fetching historical data for NSE:NIFTY 50...
+2025-03-19 17:33:16,604 - INFO - ✅ Successfully fetched 360 data points for NSE:NIFTY 50
+2025-03-19 17:33:16,607 - INFO - 📡 Fetching historical data for NSE:NIFTY BANK...
+2025-03-19 17:33:16,690 - INFO - ✅ Successfully fetched 360 data points for NSE:NIFTY BANK
+2025-03-19 17:33:16,691 - INFO - 📡 Fetching historical data for NSE:NIFTY 50...
+2025-03-19 17:33:16,767 - INFO - ✅ Successfully fetched 360 data points for NSE:NIFTY 50
+2025-03-19 17:33:16,769 - INFO - 📡 Fetching historical data for NSE:NIFTY 50...
+2025-03-19 17:33:16,848 - INFO - ✅ Successfully fetched 360 data points for NSE:NIFTY 50
+2025-03-19 17:33:16,850 - INFO - 📡 Fetching historical data for NSE:NIFTY BANK...
+2025-03-19 17:33:16,918 - INFO - ✅ Successfully fetched 360 data points for NSE:NIFTY BANK
+2025-03-19 17:40:00,147 - INFO - ✅ Configuration loaded successfully.
+2025-03-19 17:40:00,148 - INFO - ✅ KiteConnect API initialized successfully.
