@@ -3,7 +3,7 @@ import concurrent.futures
 import pandas as pd
 from market_data.fetch_data import fetch_historical_data
 from market_data.fetch_live_data import fetch_live_data
-from strategy.vwm_signals import compute_vwm_signal  # Import from VWM_signals.py
+from strategy.vwm_signals import vwm_processor  # Import from VWM_signals.py
 from strategy.signals import detect_market_structure  # Keep other functions in signals.py
 from alerts.telegram_alerts import send_telegram_alert
 from utils.config_loader import BANK_NIFTY_SYMBOL, NIFTY_SYMBOL
@@ -42,14 +42,17 @@ def fetch_and_process(symbol, history, last_signal):
     if price:
         print(f"📊 Live price of {symbol}: {price}")
         history.append({"high": price, "low": price, "close": price})
-        signal, entry, sl, tp = vwm_processor.compute_vwm_signal(pd.DataFrame(list(history)), symbol)
+        df_history = pd.DataFrame(list(history))
 
-        if signal != "HOLD" and signal != last_signal:
-            rounded_entry = round_to_nearest_100(entry) if "BANK" in symbol else round_to_nearest_50(entry)
-            message = f"\n🔹 {symbol} - {signal} at {rounded_entry}\n🎯 Profit Target: {tp}\n🛑 Stop-Loss: {sl}\n"
-            print(f"🚀 New Trade Alert: {message}")
-            send_telegram_alert(message)
-            return signal
+        if not df_history.empty:
+            signal, entry, sl, tp = vwm_processor.compute_vwm_signal(df_history, symbol)
+
+            if signal != "HOLD" and signal != last_signal:
+                rounded_entry = round_to_nearest_100(entry) if "BANK" in symbol else round_to_nearest_50(entry)
+                message = f"\n🔹 {symbol} - {signal} at {rounded_entry}\n🎯 Profit Target: {tp}\n🛑 Stop-Loss: {sl}\n"
+                print(f"🚀 New Trade Alert: {message}")
+                send_telegram_alert(message)
+                return signal
     else:
         print(f"⚠️ No live data received for {symbol}.")
     return last_signal
