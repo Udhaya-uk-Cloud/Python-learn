@@ -1,5 +1,6 @@
 import time
 import concurrent.futures
+import pandas as pd
 from market_data.fetch_data import fetch_historical_data
 from market_data.fetch_live_data import fetch_live_data
 from strategy.signals import compute_vwm_signal, detect_market_structure
@@ -15,8 +16,8 @@ nifty_history = fetch_historical_data(NIFTY_SYMBOL)
 print("✅ Historical data fetched successfully.")
 
 # Detect Market Structure before live trading
-df_nifty = fetch_historical_data(NIFTY_SYMBOL)
-df_bank_nifty = fetch_historical_data(BANK_NIFTY_SYMBOL)
+df_nifty = pd.DataFrame(list(fetch_historical_data(NIFTY_SYMBOL)))
+df_bank_nifty = pd.DataFrame(list(fetch_historical_data(BANK_NIFTY_SYMBOL)))
 
 if len(df_nifty) > 1:
     market_structure_nifty = detect_market_structure(df_nifty)
@@ -40,7 +41,7 @@ def fetch_and_process(symbol, history, last_signal):
     if price:
         print(f"📊 Live price of {symbol}: {price}")
         history.append({"high": price, "low": price, "close": price})
-        signal, entry, sl, tp = compute_vwm_signal(history, symbol)
+        signal, entry, sl, tp = compute_vwm_signal(pd.DataFrame(list(history)), symbol)
 
         if signal != "HOLD" and signal != last_signal:
             rounded_entry = round_to_nearest_100(entry) if "BANK" in symbol else round_to_nearest_50(entry)

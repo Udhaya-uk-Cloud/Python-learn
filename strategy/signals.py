@@ -1,3 +1,4 @@
+import pandas as pd
 from ta.volume import VolumeWeightedAveragePrice
 from ta.volatility import BollingerBands
 from ta.momentum import RSIIndicator
@@ -64,6 +65,12 @@ def compute_signals(df, symbol):
 
 def detect_market_structure(df):
     """Detects market structure changes (Break of Structure, Change of Character)."""
+    if not isinstance(df, pd.DataFrame):
+        df = pd.DataFrame(list(df))  # Convert deque to DataFrame
+    
+    if len(df) < 2:
+        return "NO_DATA"
+
     latest = df.iloc[-1]
     previous = df.iloc[-2]
 
@@ -77,6 +84,7 @@ def detect_market_structure(df):
 # Ensure df is defined before detecting market structure
 df = fetch_historical_data("NSE:NIFTY 50")  # Default to NIFTY for initialization
 
+df = pd.DataFrame(list(df))  # Convert deque to DataFrame
 if len(df) > 1:
     market_structure = detect_market_structure(df)
     print(f"📊 Market Structure Detected: {market_structure}")
