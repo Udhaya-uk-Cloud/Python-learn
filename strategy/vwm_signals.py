@@ -33,7 +33,7 @@ class VWMSignalProcessor:
         self.last_trade_price.setdefault(symbol, 0)
 
         # Signal computation logic
-        if latest["RSI"] > 55 and latest["MACD_Diff"] > 0 and latest["close"] > latest["EMA_Long"]:
+        if latest["RSI"] > 50 and latest["MACD_Diff"] > -0.5 and latest["close"] > latest["EMA_Long"]:
             new_signal = "BUY"
             entry_price = round_to_nearest_100(latest["close"]) if "BANK" in symbol else round_to_nearest_50(latest["close"])
         elif latest["RSI"] < 45 and latest["MACD_Diff"] < 0 and latest["close"] < latest["EMA_Long"]:
@@ -45,6 +45,7 @@ class VWMSignalProcessor:
         profit_target = round(entry_price + (3 * latest["ATR"])) if new_signal == "BUY" else round(entry_price - (3 * latest["ATR"]))
 
         return new_signal, entry_price, stop_loss, profit_target
+        print(f"📊 DEBUG: {symbol} - RSI: {latest['RSI']}, MACD: {latest['MACD_Diff']}, EMA_Short: {latest['EMA_Short']}, EMA_Long: {latest['EMA_Long']}, ATR: {latest['ATR']}, Close: {latest['close']}")
 
 # Instantiate processor globally
 vwm_processor = VWMSignalProcessor()
