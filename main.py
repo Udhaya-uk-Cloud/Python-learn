@@ -2,7 +2,7 @@ import time
 import concurrent.futures
 from market_data.fetch_data import fetch_historical_data
 from market_data.fetch_live_data import fetch_live_data
-from strategy.vwm_signals import compute_vwm_signal
+from strategy.signals import compute_vwm_signal
 from alerts.telegram_alerts import send_telegram_alert
 from utils.config_loader import BANK_NIFTY_SYMBOL, NIFTY_SYMBOL
 from utils.rounding import round_to_nearest_50, round_to_nearest_100

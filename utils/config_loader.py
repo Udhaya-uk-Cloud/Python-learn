@@ -38,7 +38,7 @@ TELEGRAM_CHAT_ID = config.get("TELEGRAM_CHAT_ID", "")
 if KITE_API_KEY and KITE_ACCESS_TOKEN:
     kite = KiteConnect(api_key=KITE_API_KEY)
     kite.set_access_token(KITE_ACCESS_TOKEN)
-    logger.info("✅ KiteConnect API initialized successfully.")
+    logger.info(" KiteConnect API initialized successfully.")
     print("✅ Kite API connection established.")
 else:
     logger.error("⚠️ Kite API credentials are missing. Trading bot cannot function.")
