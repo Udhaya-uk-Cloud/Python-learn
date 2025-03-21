@@ -1,7 +1,15 @@
 {
     "KITE_API_KEY": "obucq3ze13fslg92",
-    "KITE_ACCESS_TOKEN": "mai7cVgqdsAYFtcCgy4GY1g7dnyY4CWU",
+    "KITE_ACCESS_TOKEN": "vxFMRbrWnX9kYmmYPATZGVsioc8EbUbL",
     "TELEGRAM_BOT_TOKEN": "7559832108:AAEQIWNPDpb1zP5ltOUV-DX4VfMT3E5Mk4w",
-    "TELEGRAM_CHAT_ID": "1946830711"
+    "TELEGRAM_CHAT_ID": "1946830711",
+    "TRADE_SETTINGS": {
+      "ATR_MULTIPLIER": 3.0,
+      "EMA_SHORT": 9,
+      "EMA_LONG": 21,
+      "MACD_FAST": 12,
+      "MACD_SLOW": 26,
+      "MACD_SIGNAL": 9
+  }
   }
   
