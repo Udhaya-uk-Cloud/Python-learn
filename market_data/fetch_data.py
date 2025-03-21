@@ -1,42 +1,44 @@
+# market_data/fetcher.py
+import logging
 from datetime import datetime
+from kiteconnect import KiteConnect
 from collections import deque
-from utils.config_loader import kite
-from utils.logger import logger
+import json
 
-# Define Instrument Tokens
+# Load API config
+with open("config.json") as config_file:
+    config = json.load(config_file)
+
+KITE_API_KEY = config["KITE_API_KEY"]
+KITE_ACCESS_TOKEN = config["KITE_ACCESS_TOKEN"]
+
+# Initialize KiteConnect
+kite = KiteConnect(api_key=KITE_API_KEY)
+kite.set_access_token(KITE_ACCESS_TOKEN)
+
+# Index instrument tokens
 INDEX_TOKENS = {
     "NSE:NIFTY 50": 256265,
     "NSE:NIFTY BANK": 260105
 }
 
 def fetch_historical_data(symbol):
-    """Fetches historical market data from Kite API with logging."""
     today = datetime.now().date()
     start_time = datetime(today.year, today.month, today.day, 9, 15, 0)
     end_time = datetime(today.year, today.month, today.day, 15, 15, 0)
 
-    logger.info(f"📡 Fetching historical data for {symbol}...")
-    
     try:
         instrument_token = INDEX_TOKENS.get(symbol)
-        if instrument_token is None:
-            logger.error(f"❌ Instrument token not found for {symbol}")
+        if not instrument_token:
+            logging.error(f"Instrument token not found for {symbol}")
             return deque([], maxlen=25)
 
-        historical_data = kite.historical_data(instrument_token, start_time, end_time, "minute")
-        
-        if not historical_data:
-            logger.warning(f"⚠️ No historical data found for {symbol}")
-            return deque([], maxlen=25)
-        
-        logger.info(f"✅ Successfully fetched {len(historical_data)} data points for {symbol}")
-        print(f"✅ Historical data fetched for {symbol}: {len(historical_data)} entries")
+        candles = kite.historical_data(instrument_token, start_time, end_time, "minute")
 
         return deque(
-            [{"high": c["high"], "low": c["low"], "close": c["close"], "volume": c["volume"]} for c in historical_data],
+            [{"high": c[2], "low": c[3], "close": c[4], "volume": c[5]} for c in candles],
             maxlen=25
         )
     except Exception as e:
-        logger.error(f"❌ Error fetching historical data for {symbol}: {e}")
-        print(f"❌ Error fetching historical data for {symbol}: {e}")
+        logging.error(f"Error fetching data for {symbol}: {e}")
         return deque([], maxlen=25)
